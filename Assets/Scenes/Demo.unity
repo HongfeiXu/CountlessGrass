@@ -309,8 +309,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a1661157e631814999b95069d5d08fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  heightMap: {fileID: 2800000, guid: 45e64b3e874365949ae291ac5232e39c, type: 3}
-  terrainHeight: 6
-  terrainSize: 64
-  terrainMat: {fileID: 2100000, guid: c1fef1f308891644a9182457cf346b4a, type: 2}
-  grassMat: {fileID: 2100000, guid: 51cf973d3e70402488fe94ea6a78ec97, type: 2}
+  m_HeightMap: {fileID: 2800000, guid: 45e64b3e874365949ae291ac5232e39c, type: 3}
+  m_TerrainHeight: 5
+  m_TerrainSize: 64
+  m_GrassPatchRowCount: 32
+  m_GrassCountPerPatch: 20
+  m_TerrainMat: {fileID: 2100000, guid: c1fef1f308891644a9182457cf346b4a, type: 2}
+  m_GrassMat: {fileID: 2100000, guid: 51cf973d3e70402488fe94ea6a78ec97, type: 2}

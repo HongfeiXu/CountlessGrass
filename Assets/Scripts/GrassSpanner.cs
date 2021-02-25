@@ -6,164 +6,195 @@ using Random = System.Random;
 public class GrassSpanner : MonoBehaviour
 {
 
-    #region 字段
+	public Texture2D m_HeightMap;
+	public float m_TerrainHeight;
+	public int m_TerrainSize = 64;
+	public int m_GrassPatchRowCount = 32;
+	public int m_GrassCountPerPatch = 20;
+	public Material m_TerrainMat;
+	public Material m_GrassMat;
+	private List<Vector3> m_Verts = new List<Vector3>();
+	private Random m_Random;
 
-    public Texture2D heightMap;
-    public float terrainHeight;
-    public int terrainSize = 64;
-    public Material terrainMat;
-    public Material grassMat;
-    private List<Vector3> verts = new List<Vector3>();
-    private Random random;
+	private List<GameObject> m_GrassLayers = new List<GameObject>();  // 点云 mesh
+	GameObject m_Plane;	   // 地形mesh
 
-    #endregion
+	void Awake()
+	{
+		m_Random = new Random();
+		DoGenerate();
+	}
 
-    void Start()
-    {
-        this.random = new Random();
-        GenerateTerrain();
-        GenerateField(32, 20);
-    }
+	void DoClean()
+	{
+		if (m_Plane)
+		{
+			Destroy(m_Plane);
+			m_Plane = null;
+		}
+		foreach (GameObject grassLayer in this.m_GrassLayers)
+		{
+			Destroy(grassLayer);
+		}
+		m_GrassLayers.Clear();
+	}
 
-    /// <summary>
-    /// 结合高度图，生成一个方形的地形
-    /// </summary>
-    private void GenerateTerrain()
-    {
-        List<Vector3> verts = new List<Vector3>();
-        List<int> tris = new List<int>();
+	void DoGenerate()
+	{
+		DoClean();
+		GenerateTerrain();
+		GenerateField(m_GrassPatchRowCount, m_GrassCountPerPatch);
+	}
 
-        // 尺寸为 terrainSize x terrainSize
-        for (int i = 0; i < this.terrainSize; i++)
-        {
-            for (int j = 0; j < this.terrainSize; j++)
-            {
-                verts.Add(new Vector3(i, heightMap.GetPixel(i, j).grayscale * this.terrainHeight, j));
-                if (i == 0 || j == 0)               // 跳过左下边框顶点
-                    continue;
-                tris.Add(terrainSize * i + j);      // 构建两个三角形
-                tris.Add(terrainSize * i + j - 1);
-                tris.Add(terrainSize * (i - 1) + j - 1);
-                tris.Add(terrainSize * (i - 1) + j - 1);
-                tris.Add(terrainSize * (i - 1) + j);
-                tris.Add(terrainSize * i + j);
-            }
-        }
+	void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.R))
+		{
+			DoGenerate();
+		}
+	}
 
-        Vector2[] uvs = new Vector2[verts.Count];
+	/// <summary>
+	/// 结合高度图，生成一个方形的地形
+	/// </summary>
+	private void GenerateTerrain()
+	{
+		List<Vector3> terrainVerts = new List<Vector3>();
+		List<int> tris = new List<int>();
 
-        for (var i = 0; i < uvs.Length; i++)
-        {
-            uvs[i] = new Vector2(verts[i].x, verts[i].z);
-        }
+		// 尺寸为 m_TerrainSize x m_TerrainSize
+		for (int i = 0; i < this.m_TerrainSize; i++)
+		{
+			for (int j = 0; j < this.m_TerrainSize; j++)
+			{
+				terrainVerts.Add(new Vector3(i, m_HeightMap.GetPixel(i, j).grayscale * this.m_TerrainHeight, j));
+				if (i == 0 || j == 0)			   // 跳过左下边框顶点
+					continue;
+				tris.Add(m_TerrainSize * i + j);	  // 构建两个三角形
+				tris.Add(m_TerrainSize * i + j - 1);
+				tris.Add(m_TerrainSize * (i - 1) + j - 1);
+				tris.Add(m_TerrainSize * (i - 1) + j - 1);
+				tris.Add(m_TerrainSize * (i - 1) + j);
+				tris.Add(m_TerrainSize * i + j);
+			}
+		}
 
-        GameObject plane = new GameObject("groundPlane");
-        plane.AddComponent<MeshFilter>();
-        MeshRenderer renderer = plane.AddComponent<MeshRenderer>();
-        renderer.sharedMaterial = terrainMat;
+		Vector2[] uvs = new Vector2[terrainVerts.Count];
 
-        Mesh groundMesh = new Mesh();
-        groundMesh.vertices = verts.ToArray();
-        groundMesh.uv = uvs;
-        groundMesh.triangles = tris.ToArray();
-        groundMesh.RecalculateNormals();
-        plane.GetComponent<MeshFilter>().mesh = groundMesh;
+		for (var i = 0; i < uvs.Length; i++)
+		{
+			uvs[i] = new Vector2(terrainVerts[i].x, terrainVerts[i].z);
+		}
 
-        this.verts.Clear();
-    }
+		m_Plane = new GameObject("groundPlane");
+		m_Plane.AddComponent<MeshFilter>();
+		MeshRenderer renderer = m_Plane.AddComponent<MeshRenderer>();
+		renderer.sharedMaterial = m_TerrainMat;
 
-    /// <summary>
-    /// 生成草地
-    /// </summary>
-    /// <param name="grassPatchRowCount"></param>
-    /// <param name="grassCountPerPatch"></param>
-    private void GenerateField(int grassPatchRowCount, int grassCountPerPatch)
-    {
-        List<int> indices = new List<int>();
-        for (int i = 0; i < 65000; i++) // Unity的网格顶点上限是65000
-        {
-            indices.Add(i);
-        }
+		Mesh groundMesh = new Mesh();
+		groundMesh.vertices = terrainVerts.ToArray();
+		groundMesh.uv = uvs;
+		groundMesh.triangles = tris.ToArray();
+		groundMesh.RecalculateNormals();
+		m_Plane.GetComponent<MeshFilter>().mesh = groundMesh;
+	}
 
-        Vector3 startPosition = new Vector3(0, 0, 0);
-        Vector3 patchSize = new Vector3(terrainSize / grassPatchRowCount, 0, terrainSize / grassPatchRowCount);
+	/// <summary>
+	/// 生成草地
+	/// </summary>
+	/// <param name="m_GrassPatchRowCount"></param>
+	/// <param name="m_GrassCountPerPatch"></param>
+	private void GenerateField(int m_GrassPatchRowCount, int m_GrassCountPerPatch)
+	{
+		List<int> indices = new List<int>();
+		for (int i = 0; i < 65000; i++) // Unity的网格顶点上限是65000
+		{
+			indices.Add(i);
+		}
 
-        // 所有草根顶点的位置
-        for (int x = 0; x < grassPatchRowCount; x++)
-        {
-            for (int y = 0; y < grassPatchRowCount; y++)
-            {
-                this.GenerateGrass(startPosition, patchSize, grassCountPerPatch);
-                startPosition.x += patchSize.x;
-            }
+		Vector3 startPosition = new Vector3(0, 0, 0);
+		Vector3 patchSize = new Vector3(m_TerrainSize / m_GrassPatchRowCount, 0, m_TerrainSize / m_GrassPatchRowCount);
 
-            startPosition.x = 0;
-            startPosition.z += patchSize.z;
-        }
+		// 所有草根顶点的位置
+		for (int x = 0; x < m_GrassPatchRowCount; x++)
+		{
+			for (int y = 0; y < m_GrassPatchRowCount; y++)
+			{
+				this.GenerateGrass(startPosition, patchSize, m_GrassCountPerPatch);
+				startPosition.x += patchSize.x;
+			}
 
-        GameObject grassLayer;
-        MeshFilter mf;
-        MeshRenderer renderer;
-        Mesh m;
+			startPosition.x = 0;
+			startPosition.z += patchSize.z;
+		}
 
-        // 可能需要不止一个mesh来放草根mesh
-        int suffix = 0;
-        while (verts.Count > 65000)
-        {
-            m = new Mesh();
-            m.vertices = verts.GetRange(0, 65000).ToArray();
-            m.SetIndices(indices.ToArray(), MeshTopology.Points, 0);    // Points组成的mesh
+		GameObject grassLayer;
+		MeshFilter mf;
+		MeshRenderer renderer;
+		Mesh m;
 
-            grassLayer = new GameObject("grassLayer" + suffix.ToString());
-            mf = grassLayer.AddComponent<MeshFilter>();
-            renderer = grassLayer.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = grassMat;
-            mf.mesh = m;
-            verts.RemoveRange(0, 65000);
-            suffix += 1;
-        }
+		// 可能需要不止一个mesh来放草根mesh
+		int suffix = 0;
+		while (m_Verts.Count > 65000)
+		{
+			m = new Mesh();
+			m.vertices = m_Verts.GetRange(0, 65000).ToArray();
+			m.SetIndices(indices.ToArray(), MeshTopology.Points, 0);	// Points组成的mesh
 
-        m = new Mesh();
-        m.vertices = verts.ToArray();
-        m.SetIndices(indices.GetRange(0, verts.Count).ToArray(), MeshTopology.Points, 0);
-        grassLayer = new GameObject("grassLayer" + suffix.ToString());
-        mf = grassLayer.AddComponent<MeshFilter>();
-        renderer = grassLayer.AddComponent<MeshRenderer>();
-        renderer.sharedMaterial = grassMat;
-        mf.mesh = m;
+			grassLayer = new GameObject("grassLayer" + suffix.ToString());
+			mf = grassLayer.AddComponent<MeshFilter>();
+			renderer = grassLayer.AddComponent<MeshRenderer>();
+			renderer.sharedMaterial = m_GrassMat;
+			mf.mesh = m;
+			m_Verts.RemoveRange(0, 65000);
+			suffix += 1;
+			m_GrassLayers.Add(grassLayer);
+		}
 
-        return;
-    }
+		m = new Mesh();
+		m.vertices = m_Verts.ToArray();
+		m.SetIndices(indices.GetRange(0, m_Verts.Count).ToArray(), MeshTopology.Points, 0);
+		grassLayer = new GameObject("grassLayer" + suffix.ToString());
+		mf = grassLayer.AddComponent<MeshFilter>();
+		renderer = grassLayer.AddComponent<MeshRenderer>();
+		renderer.sharedMaterial = m_GrassMat;
+		mf.mesh = m;
+		m_GrassLayers.Add(grassLayer);
 
-    /// <summary>
-    /// 生成一个patch内的草根
-    /// </summary>
-    /// <param name="startPosition"></param>
-    /// <param name="patchSize"></param>
-    /// <param name="grassCountPerPatch"></param>
-    private void GenerateGrass(Vector3 startPosition, Vector3 patchSize, int grassCountPerPatch)
-    {
-        for (var i = 0; i < grassCountPerPatch; i++)
-        {
-            // 随机一下草的位置
-            var randomizedZDistance = (float)this.random.NextDouble() * patchSize.z;
-            var randomizedXDistance = (float)this.random.NextDouble() * patchSize.x;
+		m_Verts.Clear();
 
-            // 高度图的像素坐标
-            int indexX = (int)((startPosition.x + randomizedXDistance));
-            int indexZ = (int)((startPosition.z + randomizedZDistance));
-            if (indexX >= terrainSize)
-            {
-                indexX = (int)terrainSize - 1;
-            }
-            if (indexZ >= terrainSize)
-            {
-                indexZ = (int)terrainSize - 1;
-            }
+		return;
+	}
 
-            var currentPosition = new Vector3(startPosition.x + (randomizedXDistance), heightMap.GetPixel(indexX, indexZ).grayscale * (terrainHeight + 1), startPosition.z + randomizedZDistance);
-            this.verts.Add(currentPosition);
-        }
-    }
+	/// <summary>
+	/// 生成一个patch内的草根
+	/// </summary>
+	/// <param name="startPosition"></param>
+	/// <param name="patchSize"></param>
+	/// <param name="m_GrassCountPerPatch"></param>
+	private void GenerateGrass(Vector3 startPosition, Vector3 patchSize, int m_GrassCountPerPatch)
+	{
+		for (var i = 0; i < m_GrassCountPerPatch; i++)
+		{
+			// 随机一下草的位置
+			var randomizedZDistance = (float)this.m_Random.NextDouble() * patchSize.z;
+			var randomizedXDistance = (float)this.m_Random.NextDouble() * patchSize.x;
+
+			// 高度图的像素坐标
+			int indexX = (int)((startPosition.x + randomizedXDistance));
+			int indexZ = (int)((startPosition.z + randomizedZDistance));
+			if (indexX >= m_TerrainSize)
+			{
+				indexX = (int)m_TerrainSize - 1;
+			}
+			if (indexZ >= m_TerrainSize)
+			{
+				indexZ = (int)m_TerrainSize - 1;
+			}
+
+			var currentPosition = new Vector3(startPosition.x + (randomizedXDistance), m_HeightMap.GetPixel(indexX, indexZ).grayscale * (m_TerrainHeight + 1), startPosition.z + randomizedZDistance);
+			this.m_Verts.Add(currentPosition);
+		}
+	}
 
 }
