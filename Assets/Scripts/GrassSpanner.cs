@@ -16,12 +16,17 @@ public class GrassSpanner : MonoBehaviour
 	private List<Vector3> m_Verts = new List<Vector3>();
 	private Random m_Random;
 
-	private List<GameObject> m_GrassLayers = new List<GameObject>();  // 点云 mesh
-	GameObject m_Plane;	   // 地形mesh
+	public List<GameObject> m_GrassLayers;  // 点云 mesh
+	GameObject m_Plane;    // 地形mesh
+
+	// 移动交互相关
+	[SerializeField]
+	Transform m_CapsuleTransform;	// 移动的胶囊体
 
 	void Awake()
 	{
 		m_Random = new Random();
+		m_GrassLayers = new List<GameObject>();
 		DoGenerate();
 	}
 
@@ -51,6 +56,22 @@ public class GrassSpanner : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.R))
 		{
 			DoGenerate();
+		}
+
+		UpdateCharacterPosition();
+	}
+
+	/// <summary>
+	/// 传入角色位置到shader中
+	/// </summary>
+	void UpdateCharacterPosition()
+	{
+		foreach (GameObject grassLayer in this.m_GrassLayers)
+		{
+			if (grassLayer.GetComponent<Renderer>().material != null)
+			{
+				grassLayer.GetComponent<Renderer>().material.SetVector("_CharacterPosition", m_CapsuleTransform.position);
+			}
 		}
 	}
 
@@ -97,6 +118,8 @@ public class GrassSpanner : MonoBehaviour
 		groundMesh.triangles = tris.ToArray();
 		groundMesh.RecalculateNormals();
 		m_Plane.GetComponent<MeshFilter>().mesh = groundMesh;
+
+		m_Plane.AddComponent<MeshCollider>();
 	}
 
 	/// <summary>
@@ -196,5 +219,4 @@ public class GrassSpanner : MonoBehaviour
 			this.m_Verts.Add(currentPosition);
 		}
 	}
-
 }

@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: GrassMat
-  m_Shader: {fileID: 4800000, guid: f5d0fde071320ee40b730bbd84b1e07d, type: 3}
+  m_Name: TriangleAnimationMat
+  m_Shader: {fileID: 4800000, guid: c4d64737c300d3648abf340add830fc8, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -19,10 +19,6 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _AlphaTex:
-        m_Texture: {fileID: 2800000, guid: 1e713df6ae96f8940bd8a0558d66998f, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -44,7 +40,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 7c7f9c703d75c4b4c8972723020033b6, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -60,31 +56,31 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _A: 2.88
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _ExtrudeMaxValue: 0.084
+    - _ExtrudeRandomValue: 0.132
+    - _ExtrudeSpeed: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Height: 3
-    - _LODDistance1: 5
-    - _LODDistance2: 10
-    - _LodDistanceFar: 100
-    - _LodDistanceNear: 10
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _SizeVelocity: 4.42
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _StampRadius: 3
-    - _StampStrength: 0.5
+    - _Threshold: 1.14
     - _UVSec: 0
-    - _Width: 0.05
+    - _V0: 2.56
     - _ZWrite: 1
     m_Colors:
+    - _BottomColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _ExtraColor: {r: 2.69, g: 2.69, b: 2.69, a: 1}
+    - _TopColor: {r: 0.9056604, g: 0.13243146, b: 0.7372549, a: 1}
