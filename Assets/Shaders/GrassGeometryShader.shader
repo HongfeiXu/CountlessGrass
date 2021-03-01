@@ -171,40 +171,40 @@ Shader "Custom/Grass" {
 					// 让草旋转一哈
 					v[i].pos = mul(transform, v[i].pos);
 
-					//// 让草不要全部竖直冲着天
-					//float bendingStrength = 1.0f;
-					//float2 randomDir = float2(sin(random * 15), sin(random * 10));
-					//v[i].pos.xz += bendingStrength * randomDir * windCoEff * windCoEff;
+					// 让草不要全部竖直冲着天
+					float bendingStrength = 1.0f;
+					float2 randomDir = float2(sin(random * 15), sin(random * 10));
+					v[i].pos.xz += bendingStrength * randomDir * windCoEff * windCoEff;
 
-					//// 起风了
-					//float2 wind = float2(sin(_Time.x * UNITY_PI * 5), sin(_Time.x * UNITY_PI * 5));
-					//wind.x += (sin(_Time.x + root.x / 25) + sin((_Time.x + root.x / 15) + 50)) * 0.5;
-					//wind.y += cos(_Time.x + root.z / 80);
-					//wind *= lerp(0.7, 1.0, 1.0 - random);
+					// 起风了
+					float2 wind = float2(sin(_Time.x * UNITY_PI * 5), sin(_Time.x * UNITY_PI * 5));
+					wind.x += (sin(_Time.x + root.x / 25) + sin((_Time.x + root.x / 15) + 50)) * 0.5;
+					wind.y += cos(_Time.x + root.z / 80);
+					wind *= lerp(0.7, 1.0, 1.0 - random);
 
-					//const float oscillateDelta = 0.05;
-					//const float oscillationStrength = 2.5f;	// 摆动强度
-					//float sinSkewCoeff = random;			// 歪斜系数
-					//float lerpCoeff = (sin(oscillationStrength * _Time.x + sinSkewCoeff) + 1.0) / 2;
-					//float2 leftWindBound = wind * (1.0 - oscillateDelta);
-					//float2 rightWindBound = wind * (1.0 + oscillateDelta);
-					//wind = lerp(leftWindBound, rightWindBound, lerpCoeff);
+					const float oscillateDelta = 0.05;
+					const float oscillationStrength = 2.5f;	// 摆动强度
+					float sinSkewCoeff = random;			// 歪斜系数
+					float lerpCoeff = (sin(oscillationStrength * _Time.x + sinSkewCoeff) + 1.0) / 2;
+					float2 leftWindBound = wind * (1.0 - oscillateDelta);
+					float2 rightWindBound = wind * (1.0 + oscillateDelta);
+					wind = lerp(leftWindBound, rightWindBound, lerpCoeff);
 
-					//float randomAngle = lerp(-UNITY_PI, UNITY_PI, random);
-					//float randomMagnitude = lerp(0, 1., random);
-					//float2 randomWindDir = float2(sin(randomAngle), cos(randomAngle));
-					//wind += randomWindDir * randomMagnitude;	// 风向加点随机变化
+					float randomAngle = lerp(-UNITY_PI, UNITY_PI, random);
+					float randomMagnitude = lerp(0, 1., random);
+					float2 randomWindDir = float2(sin(randomAngle), cos(randomAngle));
+					wind += randomWindDir * randomMagnitude;	// 风向加点随机变化
 
-					//float windForce = length(wind);
-					//v[i].pos.xz += wind.xy * windCoEff;			// 计算顶点被风吹后的坐标
-					//v[i].pos.y -= windForce * windCoEff * 0.8;
+					float windForce = length(wind);
+					v[i].pos.xz += wind.xy * windCoEff;			// 计算顶点被风吹后的坐标
+					v[i].pos.y -= windForce * windCoEff * 0.8;
 
-					//// 角色移动交互
-					//float dist = distance(_CharacterPosition, worldPos);
-					//float3 stampStrength = 1 - saturate(dist / _StampRadius);
-					//float3 stampDir = worldPos - _CharacterPosition;
-					//stampDir = normalize(stampDir) * stampStrength * _StampStrength * v[i].pos.y;
-					//v[i].pos.xz += stampDir.xz;
+					// 角色移动交互
+					float dist = distance(_CharacterPosition, worldPos);
+					float3 stampStrength = 1 - saturate(dist / _StampRadius);
+					float3 stampDir = worldPos - _CharacterPosition;
+					stampDir = normalize(stampDir) * stampStrength * _StampStrength * v[i].pos.y;
+					v[i].pos.xz += stampDir.xz;
 
 					// 坐标转换到裁剪空间
 					v[i].pos = UnityObjectToClipPos(v[i].pos);

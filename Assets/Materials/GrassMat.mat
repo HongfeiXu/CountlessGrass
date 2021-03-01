@@ -70,7 +70,7 @@ Material:
     - _Height: 3
     - _LODDistance1: 5
     - _LODDistance2: 10
-    - _LodDistanceFar: 100
+    - _LodDistanceFar: 20
     - _LodDistanceNear: 10
     - _Metallic: 0
     - _Mode: 0
