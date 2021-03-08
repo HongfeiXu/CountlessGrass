@@ -227,7 +227,24 @@ Shader "Custom/Grass" {
 			{
 				fixed4 color = tex2D(_MainTex, IN.uv);		// 颜色
 				fixed4 alpha = tex2D(_AlphaTex, IN.uv);		// 轮廓
-				return half4(color.rgb, alpha.g);
+				half3 worldNormal = UnityObjectToWorldNormal(IN.norm);
+
+				//ads
+				fixed3 light;
+
+				//ambient
+				fixed3 ambient = ShadeSH9(half4(worldNormal, 1));
+
+				//diffuse
+				fixed3 diffuseLight = saturate(dot(worldNormal, UnityWorldSpaceLightDir(IN.pos))) * _LightColor0;
+
+				//specular Blinn-Phong 
+				fixed3 halfVector = normalize(UnityWorldSpaceLightDir(IN.pos) + WorldSpaceViewDir(IN.pos));
+				fixed3 specularLight = pow(saturate(dot(worldNormal, halfVector)), 15) * _LightColor0;
+
+				light = ambient + diffuseLight + specularLight;
+
+				return half4(color.rgb * light * _ExtraColor, alpha.g);
 			}
 			ENDCG
 		}
